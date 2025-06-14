@@ -15,8 +15,8 @@ public partial class DiagramCanvas : IAsyncDisposable
 
     protected ElementReference elementReference;
 
-    [CascadingParameter] public BlazorDiagram BlazorDiagram { get; set; } = null!;
-
+    [CascadingParameter] public BlazorDiagram? BlazorDiagram { get; set; } = null;
+    private BlazorDiagram? BlazorDiagram_ActiveVersion;
     [Parameter] public RenderFragment? Widgets { get; set; }
 
     [Parameter] public RenderFragment? AdditionalSvg { get; set; }
@@ -29,7 +29,7 @@ public partial class DiagramCanvas : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        BlazorDiagram.Changed -= OnDiagramChanged;
+        UnSubscribe();
 
         if (_reference == null)
             return;
@@ -42,6 +42,8 @@ public partial class DiagramCanvas : IAsyncDisposable
 
     private string GetLayerStyle(int order)
     {
+        if (BlazorDiagram is null) return "";
+
         return FormattableString.Invariant(
             $"transform: translate({BlazorDiagram.Pan.X}px, {BlazorDiagram.Pan.Y}px) scale({BlazorDiagram.Zoom}); z-index: {order};");
     }
@@ -50,17 +52,47 @@ public partial class DiagramCanvas : IAsyncDisposable
     {
         base.OnInitialized();
 
-        _reference = DotNetObjectReference.Create(this);
-        BlazorDiagram.Changed += OnDiagramChanged;
+        _reference = DotNetObjectReference.Create(this);        
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        if (BlazorDiagram_ActiveVersion != BlazorDiagram)
+        {
+
+            UnSubscribe();
+            // Parameter has changed;
+            BlazorDiagram_ActiveVersion = BlazorDiagram;
+            Subscribe();
+
+            if (this.HasFirstRendered)
+            {
+                BlazorDiagram_ActiveVersion?.SetContainer(await JSRuntime.GetBoundingClientRect(elementReference));            
+            }
+            
+        }
+    }
+    void UnSubscribe()
+    {
+        if (BlazorDiagram_ActiveVersion is not null)
+            BlazorDiagram_ActiveVersion.Changed -= OnDiagramChanged;
+    }
+    void Subscribe()
+    {
+        if (BlazorDiagram_ActiveVersion is not null)
+            BlazorDiagram_ActiveVersion.Changed += OnDiagramChanged;
+    }
+    private bool HasFirstRendered;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
 
         if (firstRender)
         {
-            BlazorDiagram.SetContainer(await JSRuntime.GetBoundingClientRect(elementReference));
+            this.HasFirstRendered = true;
+            BlazorDiagram_ActiveVersion?.SetContainer(await JSRuntime.GetBoundingClientRect(elementReference));
             await JSRuntime.ObserveResizes(elementReference, _reference!);
         }
     }
@@ -68,7 +100,7 @@ public partial class DiagramCanvas : IAsyncDisposable
     [JSInvokable]
     public void OnResize(Rectangle rect)
     {
-        BlazorDiagram.SetContainer(rect);
+        BlazorDiagram_ActiveVersion?.SetContainer(rect);
     }
 
     protected override bool ShouldRender()
@@ -81,27 +113,27 @@ public partial class DiagramCanvas : IAsyncDisposable
 
     private void OnPointerDown(PointerEventArgs e)
     {
-        BlazorDiagram.TriggerPointerDown(null, e.ToCore());
+        BlazorDiagram_ActiveVersion?.TriggerPointerDown(null, e.ToCore());
     }
 
     private void OnPointerMove(PointerEventArgs e)
     {
-        BlazorDiagram.TriggerPointerMove(null, e.ToCore());
+        BlazorDiagram_ActiveVersion?.TriggerPointerMove(null, e.ToCore());
     }
 
     private void OnPointerUp(PointerEventArgs e)
     {
-        BlazorDiagram.TriggerPointerUp(null, e.ToCore());
+        BlazorDiagram_ActiveVersion?.TriggerPointerUp(null, e.ToCore());
     }
 
     private void OnKeyDown(KeyboardEventArgs e)
     {
-        BlazorDiagram.TriggerKeyDown(e.ToCore());
+        BlazorDiagram_ActiveVersion?.TriggerKeyDown(e.ToCore());
     }
 
     private void OnWheel(WheelEventArgs e)
     {
-        BlazorDiagram.TriggerWheel(e.ToCore());
+        BlazorDiagram_ActiveVersion?.TriggerWheel(e.ToCore());
     }
 
     private void OnDiagramChanged()
