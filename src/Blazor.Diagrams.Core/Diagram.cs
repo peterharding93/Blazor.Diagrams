@@ -210,10 +210,17 @@ public abstract class Diagram
         var minX = bounds.Left - margin;
         var minY = bounds.Top - margin;
 
-        SuspendRefresh = true;
+
 
         var xf = Container.Width / width;
         var yf = Container.Height / height;
+        if (xf == 0 || yf == 0)
+        {
+            // This can happen with invalid dimensions resulting in NaN or Infinity values
+            return;
+        }
+        
+        SuspendRefresh = true;
         SetZoom(Math.Min(xf, yf));
 
         var nx = Container.Left + Pan.X + minX * Zoom;
