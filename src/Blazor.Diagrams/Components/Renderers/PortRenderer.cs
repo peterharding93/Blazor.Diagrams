@@ -99,6 +99,7 @@ public class PortRenderer : ComponentBase, IDisposable
 
     private PortModel? FindPortOn(double clientX, double clientY)
     {
+        var relativePt = BlazorDiagram.GetRelativeMousePoint(clientX, clientY);
         var allPorts = BlazorDiagram.Nodes.SelectMany(n => n.Ports)
             .Union(BlazorDiagram.Groups.SelectMany(g => g.Ports));
 
@@ -107,7 +108,6 @@ public class PortRenderer : ComponentBase, IDisposable
             if (!port.Initialized)
                 continue;
 
-            var relativePt = BlazorDiagram.GetRelativeMousePoint(clientX, clientY);
             if (port.GetBounds().ContainsPoint(relativePt))
                 return port;
         }
