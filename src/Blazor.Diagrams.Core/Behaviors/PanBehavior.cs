@@ -10,6 +10,10 @@ public class PanBehavior : Behavior
     private double _lastClientX;
     private double _lastClientY;
 
+    public MouseEventButton AssignedButton = MouseEventButton.Left;
+    public bool RequireModified_CtrlKey = false;
+    public bool RequireModified_ShiftKey = false;
+    public bool RequireModified_AltKey = false;
     public PanBehavior(Diagram diagram) : base(diagram)
     {
         Diagram.PointerDown += OnPointerDown;
@@ -19,19 +23,23 @@ public class PanBehavior : Behavior
 
     private void OnPointerDown(Model? model, PointerEventArgs e)
     {
-        if (e.Button != (int)MouseEventButton.Left)
+        if (e.Button != (int)AssignedButton)
             return;
 
-        Start(model, e.ClientX, e.ClientY, e.ShiftKey);
+        if (e.ShiftKey != RequireModified_ShiftKey || e.CtrlKey != RequireModified_CtrlKey || e.AltKey != RequireModified_AltKey)
+            return;
+
+
+        Start(model, e.ClientX, e.ClientY);
     }
 
     private void OnPointerMove(Model? model, PointerEventArgs e) => Move(e.ClientX, e.ClientY);
 
     private void OnPointerUp(Model? model, PointerEventArgs e) => End();
 
-    private void Start(Model? model, double clientX, double clientY, bool shiftKey)
+    private void Start(Model? model, double clientX, double clientY)
     {
-        if (!Diagram.Options.AllowPanning || model != null || shiftKey)
+        if (!Diagram.Options.AllowPanning || model != null )
             return;
 
         _initialPan = Diagram.Pan;
