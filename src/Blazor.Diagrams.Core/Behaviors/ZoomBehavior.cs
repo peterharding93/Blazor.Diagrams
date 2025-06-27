@@ -6,6 +6,9 @@ namespace Blazor.Diagrams.Core.Behaviors;
 
 public class ZoomBehavior : Behavior
 {
+
+    public MouseEventsModifierRule RequiredModifiers { get; set; } = new() { ShiftKey = true };
+
     public ZoomBehavior(Diagram diagram) : base(diagram)
     {
         Diagram.Wheel += Diagram_Wheel;
@@ -14,6 +17,9 @@ public class ZoomBehavior : Behavior
     private void Diagram_Wheel(WheelEventArgs e)
     {
         if (Diagram.Container == null || e.DeltaY == 0)
+            return;
+
+        if (!RequiredModifiers.TestMatch(e))
             return;
 
         if (!Diagram.Options.Zoom.Enabled)

@@ -11,9 +11,8 @@ public class PanBehavior : Behavior
     private double _lastClientY;
 
     public MouseEventButton AssignedButton = MouseEventButton.Left;
-    public bool RequireModified_CtrlKey = false;
-    public bool RequireModified_ShiftKey = false;
-    public bool RequireModified_AltKey = false;
+
+    public MouseEventsModifierRule RequiredModifiers { get; set; } = new ();
     public PanBehavior(Diagram diagram) : base(diagram)
     {
         Diagram.PointerDown += OnPointerDown;
@@ -26,9 +25,8 @@ public class PanBehavior : Behavior
         if (e.Button != (int)AssignedButton)
             return;
 
-        if (e.ShiftKey != RequireModified_ShiftKey || e.CtrlKey != RequireModified_CtrlKey || e.AltKey != RequireModified_AltKey)
+        if (!RequiredModifiers.TestMatch(e))
             return;
-
 
         Start(model, e.ClientX, e.ClientY);
     }
