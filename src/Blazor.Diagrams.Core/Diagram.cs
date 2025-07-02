@@ -197,7 +197,7 @@ public abstract class Diagram
 
     #endregion
 
-    public void ZoomToFit(double margin = 10)
+    public void ZoomToFit(double margin = 10, double? max = null, double? min = null)
     {
         if (Container == null || Nodes.Count == 0)
             return;
@@ -221,7 +221,11 @@ public abstract class Diagram
         }
         
         SuspendRefresh = true;
-        SetZoom(Math.Min(xf, yf));
+
+        var zoomxy = Math.Min(xf, yf);
+        zoomxy = (zoomxy > max) ? max.Value: zoomxy;
+        zoomxy = (zoomxy < min) ? min.Value : zoomxy;
+        SetZoom(zoomxy);
 
         var nx = Container.Left + Pan.X + minX * Zoom;
         var ny = Container.Top + Pan.Y + minY * Zoom;
@@ -252,6 +256,9 @@ public abstract class Diagram
 
         if (newZoom < Options.Zoom.Minimum)
             newZoom = Options.Zoom.Minimum;
+
+        if (newZoom > Options.Zoom.Maximum)
+            newZoom = Options.Zoom.Maximum;
 
         Zoom = newZoom;
         ZoomChanged?.Invoke();

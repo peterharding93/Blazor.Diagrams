@@ -26,7 +26,16 @@ public class Rectangle : IShape
         Width = Math.Abs(Left - Right);
         Height = Math.Abs(Top - Bottom);
     }
-
+    public Rectangle(Rectangle other)
+    {
+        ArgumentNullException.ThrowIfNull(other, nameof(other));        
+        Left = other.Left;
+        Top = other.Top;
+        Right = other.Right;
+        Bottom = other.Bottom;
+        Width = other.Width;
+        Height = other.Height;
+    }
     public Rectangle(Point position, Size size)
     {
         ArgumentNullException.ThrowIfNull(position, nameof(position));
