@@ -48,10 +48,11 @@ public class LinkRenderer : ComponentBase, IDisposable
         var classes = new StringBuilder()
             .Append("diagram-link")
             .AppendIf(" attached", Link.IsAttached)
+            .Append(" " + Link.CSS_Class)            
             .ToString();
 
         builder.OpenElement(0, "g");
-        builder.AddAttribute(1, "class", classes);
+        builder.AddAttribute(1, "class", classes);        
         builder.AddAttribute(2, "data-link-id", Link.Id);
         builder.AddAttribute(3, "onpointerdown", EventCallback.Factory.Create<PointerEventArgs>(this, OnPointerDown));
         builder.AddEventStopPropagationAttribute(4, "onpointerdown", true);
@@ -60,7 +61,7 @@ public class LinkRenderer : ComponentBase, IDisposable
         builder.AddAttribute(7, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this, OnMouseEnter));
         builder.AddAttribute(8, "onmouseleave", EventCallback.Factory.Create<MouseEventArgs>(this, OnMouseLeave));
         builder.OpenComponent(9, componentType);
-        builder.AddAttribute(10, "Link", Link);
+        builder.AddAttribute(10, "Link", Link);        
         builder.CloseComponent();
         builder.CloseElement();
     }

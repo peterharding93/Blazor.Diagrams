@@ -27,6 +27,8 @@ public abstract class BaseLinkModel : SelectableModel, IHasBounds, ILinkable
         Target = target;
     }
 
+    public virtual string? CSS_Class { get; }    
+
     public Anchor Source { get; private set; }
     public Anchor Target { get; private set; }
     public Diagram? Diagram { get; internal set; }
