@@ -27,7 +27,7 @@ public class PortModel : Model, IHasBounds, IHasShape, ILinkable
     }
 
     public NodeModel Parent { get; }
-    public PortAlignment Alignment { get; }
+    public PortAlignment Alignment { get; set;  }
     public Point Position { get; set; }
     public Point MiddlePosition => new(Position.X + (Size.Width / 2), Position.Y + (Size.Height / 2));
     public Size Size { get; set; }
