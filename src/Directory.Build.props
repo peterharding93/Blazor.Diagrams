@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 	<PropertyGroup>
 		<TargetFrameworks>net10.0;net9.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
